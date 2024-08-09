@@ -4,6 +4,7 @@ import com.workers.ws_order.config.mapper.MapperConfiguration;
 import com.workers.ws_order.persistance.entity.OrderEntity;
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateRequestDto;
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateResponseDto;
+import com.workers.ws_order.rest.inbound.dto.getorder.OrderSummaryDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -16,4 +17,7 @@ public interface OrderMapper {
     OrderEntity toEntity(OrderCreateRequestDto requestDto);
 
     OrderCreateResponseDto toResponseDto(OrderEntity orderEntity);
+
+    @Mapping(source = "id", target = "orderId")
+    OrderSummaryDto toSummaryDto(OrderEntity orderEntity);
 }

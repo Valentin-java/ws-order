@@ -9,10 +9,11 @@ import com.workers.ws_order.persistance.repository.OrderPhotoRepository;
 import com.workers.ws_order.persistance.repository.OrderRepository;
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateRequestDto;
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateResponseDto;
-import jakarta.transaction.Transactional;
+import com.workers.ws_order.rest.inbound.dto.getorder.OrderSummaryDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +71,26 @@ public class OrderServiceImpl implements OrderService {
     private OrderCreateResponseDto mapToResponseDto(OrderEntity orderEntity, List<OrderPhotoEntity> photos) {
         orderEntity.setPhotos(photos);
         return orderMapper.toResponseDto(orderEntity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderSummaryDto> getNewOrdersByCustomerId(Long customerId) {
+        log.info("Fetching new orders for customer ID: {}", customerId);
+        return orderRepository.findByCustomerIdAndStatus(customerId, OrderStatus.NEW)
+                .stream()
+                .map(orderMapper::toSummaryDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderSummaryDto> getCompletedAndCancelledOrdersByCustomerId(Long customerId) {
+        log.info("Fetching completed and cancelled orders for customer ID: {}", customerId);
+        return orderRepository.findByCustomerIdAndStatusIn(customerId, List.of(OrderStatus.COMPLETED, OrderStatus.CANCELLED))
+                .stream()
+                .map(orderMapper::toSummaryDto)
+                .toList();
     }
 
 }
