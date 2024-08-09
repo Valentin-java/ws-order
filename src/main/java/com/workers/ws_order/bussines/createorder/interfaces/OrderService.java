@@ -13,4 +13,6 @@ public interface OrderService {
     List<OrderSummaryDto> getNewOrdersByCustomerId(Long customerId);
 
     List<OrderSummaryDto> getCompletedAndCancelledOrdersByCustomerId(Long customerId);
+
+    OrderCreateResponseDto getOrderDetailsById(Long orderId);
 }

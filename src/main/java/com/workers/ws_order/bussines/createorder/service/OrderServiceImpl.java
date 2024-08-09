@@ -14,9 +14,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Slf4j
 @Service
@@ -91,6 +94,15 @@ public class OrderServiceImpl implements OrderService {
                 .stream()
                 .map(orderMapper::toSummaryDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderCreateResponseDto getOrderDetailsById(Long orderId) {
+        log.info("Fetching details for order ID: {}", orderId);
+        return orderRepository.findById(orderId)
+                .map(orderMapper::toResponseDto)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found with ID: " + orderId));
     }
 
 }
