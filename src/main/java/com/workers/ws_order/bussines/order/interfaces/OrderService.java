@@ -1,8 +1,9 @@
-package com.workers.ws_order.bussines.createorder.interfaces;
+package com.workers.ws_order.bussines.order.interfaces;
 
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateRequestDto;
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateResponseDto;
 import com.workers.ws_order.rest.inbound.dto.getorder.OrderSummaryDto;
+import com.workers.ws_order.rest.inbound.dto.updateorder.OrderUpdateRequestDto;
 
 import java.util.List;
 
@@ -15,4 +16,6 @@ public interface OrderService {
     List<OrderSummaryDto> getCompletedAndCancelledOrdersByCustomerId(Long customerId);
 
     OrderCreateResponseDto getOrderDetailsById(Long orderId);
+
+    OrderCreateResponseDto updateOrder(Long orderId, OrderUpdateRequestDto requestDto);
 }

@@ -1,7 +1,7 @@
-package com.workers.ws_order.bussines.createorder.service;
+package com.workers.ws_order.bussines.order.service;
 
-import com.workers.ws_order.bussines.createorder.interfaces.OrderService;
-import com.workers.ws_order.bussines.createorder.mapper.OrderMapper;
+import com.workers.ws_order.bussines.order.interfaces.OrderService;
+import com.workers.ws_order.bussines.order.mapper.OrderMapper;
 import com.workers.ws_order.persistance.entity.OrderEntity;
 import com.workers.ws_order.persistance.entity.OrderPhotoEntity;
 import com.workers.ws_order.persistance.enums.OrderStatus;
@@ -10,6 +10,7 @@ import com.workers.ws_order.persistance.repository.OrderRepository;
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateRequestDto;
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateResponseDto;
 import com.workers.ws_order.rest.inbound.dto.getorder.OrderSummaryDto;
+import com.workers.ws_order.rest.inbound.dto.updateorder.OrderUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -51,14 +52,12 @@ public class OrderServiceImpl implements OrderService {
         return responseDto;
     }
 
-    // Вспомогательный метод для создания сущности заказа
     private OrderEntity createOrderEntity(OrderCreateRequestDto requestDto) {
         OrderEntity orderEntity = orderMapper.toEntity(requestDto);
         orderEntity.setStatus(OrderStatus.NEW);
         return orderEntity;
     }
 
-    // Вспомогательный метод для сохранения фотографий заказа
     private List<OrderPhotoEntity> saveOrderPhotos(List<byte[]> photoDataList, OrderEntity orderEntity) {
         List<OrderPhotoEntity> photos = new ArrayList<>();
         for (byte[] photoData : photoDataList) {
@@ -70,7 +69,6 @@ public class OrderServiceImpl implements OrderService {
         return orderPhotoRepository.saveAll(photos);
     }
 
-    // Вспомогательный метод для маппинга ответа
     private OrderCreateResponseDto mapToResponseDto(OrderEntity orderEntity, List<OrderPhotoEntity> photos) {
         orderEntity.setPhotos(photos);
         return orderMapper.toResponseDto(orderEntity);
@@ -103,6 +101,56 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findById(orderId)
                 .map(orderMapper::toResponseDto)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found with ID: " + orderId));
+    }
+
+    @Override
+    @Transactional
+    public OrderCreateResponseDto updateOrder(Long orderId, OrderUpdateRequestDto requestDto) {
+        log.info("Updating order with ID: {}", orderId);
+
+        OrderEntity orderEntity = findOrderById(orderId);
+        updateOrderFields(orderEntity, requestDto);
+        updateOrderPhotos(orderEntity, requestDto.photoData());
+
+        orderEntity = saveOrder(orderEntity);
+        return mapToResponseDto(orderEntity);
+    }
+
+    private OrderEntity findOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found with ID: " + orderId));
+    }
+
+    private void updateOrderFields(OrderEntity orderEntity, OrderUpdateRequestDto requestDto) {
+        orderMapper.updateOrderFromDto(requestDto, orderEntity);
+    }
+
+    private void updateOrderPhotos(OrderEntity orderEntity, List<byte[]> photoData) {
+        if (photoData != null && !photoData.isEmpty()) {
+            orderPhotoRepository.deleteAll(orderEntity.getPhotos());
+            List<OrderPhotoEntity> photos = mapPhotoDataToEntities(photoData, orderEntity);
+            orderPhotoRepository.saveAll(photos);
+            orderEntity.setPhotos(photos);
+        }
+    }
+
+    private List<OrderPhotoEntity> mapPhotoDataToEntities(List<byte[]> photoData, OrderEntity orderEntity) {
+        return photoData.stream()
+                .map(data -> {
+                    OrderPhotoEntity photoEntity = new OrderPhotoEntity();
+                    photoEntity.setPhotoData(data);
+                    photoEntity.setOrder(orderEntity);
+                    return photoEntity;
+                })
+                .toList();
+    }
+
+    private OrderEntity saveOrder(OrderEntity orderEntity) {
+        return orderRepository.save(orderEntity);
+    }
+
+    private OrderCreateResponseDto mapToResponseDto(OrderEntity orderEntity) {
+        return orderMapper.toResponseDto(orderEntity);
     }
 
 }

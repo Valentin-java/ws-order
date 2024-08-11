@@ -1,9 +1,10 @@
 package com.workers.ws_order.rest.inbound.controller;
 
-import com.workers.ws_order.bussines.createorder.interfaces.OrderService;
+import com.workers.ws_order.bussines.order.interfaces.OrderService;
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateRequestDto;
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateResponseDto;
 import com.workers.ws_order.rest.inbound.dto.getorder.OrderSummaryDto;
+import com.workers.ws_order.rest.inbound.dto.updateorder.OrderUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +43,11 @@ public class OrderController {
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderCreateResponseDto> getOrderDetailsById(@PathVariable Long orderId) {
         return ResponseEntity.ok(orderService.getOrderDetailsById(orderId));
+    }
+
+    @PostMapping("/update/{orderId}")
+    public ResponseEntity<?> updateOrder(@PathVariable Long orderId, @RequestBody OrderUpdateRequestDto requestDto) {
+        return ResponseEntity.ok(orderService.updateOrder(orderId, requestDto));
     }
 
 }
