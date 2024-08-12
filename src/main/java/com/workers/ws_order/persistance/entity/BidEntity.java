@@ -1,5 +1,6 @@
 package com.workers.ws_order.persistance.entity;
 
+import com.workers.ws_order.persistance.enums.BidStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -46,7 +47,7 @@ public class BidEntity {
     private BigDecimal price;
 
     @Column(name = "status", nullable = false)
-    private String status;
+    private BidStatus status;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
