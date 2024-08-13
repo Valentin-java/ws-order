@@ -18,4 +18,6 @@ public interface OrderService {
     OrderCreateResponseDto getOrderDetailsById(Long orderId);
 
     OrderCreateResponseDto updateOrder(Long orderId, OrderUpdateRequestDto requestDto);
+
+    List<OrderSummaryDto> getAvailableOrdersForSpecialist(Long specialistId);
 }

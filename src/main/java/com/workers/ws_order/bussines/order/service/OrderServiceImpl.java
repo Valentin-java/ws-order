@@ -4,7 +4,9 @@ import com.workers.ws_order.bussines.order.interfaces.OrderService;
 import com.workers.ws_order.bussines.order.mapper.OrderMapper;
 import com.workers.ws_order.persistance.entity.OrderEntity;
 import com.workers.ws_order.persistance.entity.OrderPhotoEntity;
+import com.workers.ws_order.persistance.enums.BidStatus;
 import com.workers.ws_order.persistance.enums.OrderStatus;
+import com.workers.ws_order.persistance.repository.BidRepository;
 import com.workers.ws_order.persistance.repository.OrderPhotoRepository;
 import com.workers.ws_order.persistance.repository.OrderRepository;
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateRequestDto;
@@ -27,9 +29,10 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
+    private final OrderMapper orderMapper;
+    private final BidRepository bidRepository;
     private final OrderRepository orderRepository;
     private final OrderPhotoRepository orderPhotoRepository;
-    private final OrderMapper orderMapper;
 
     @Override
     @Transactional
@@ -151,6 +154,18 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderCreateResponseDto mapToResponseDto(OrderEntity orderEntity) {
         return orderMapper.toResponseDto(orderEntity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderSummaryDto> getAvailableOrdersForSpecialist(Long specialistId) {
+        log.info("Fetching available orders for specialist ID: {}", specialistId);
+
+        return orderRepository.findAllByStatus(OrderStatus.NEW)
+                .stream()
+                .filter(order -> !bidRepository.existsByOrderIdAndStatus(order.getId(), BidStatus.ACCEPTED))
+                .map(orderMapper::toSummaryDto)
+                .toList();
     }
 
 }
