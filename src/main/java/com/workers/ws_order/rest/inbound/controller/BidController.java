@@ -42,4 +42,9 @@ public class BidController {
         bidService.rejectBid(bidId);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/specialist/{specialistId}")
+    public ResponseEntity<List<BidSummaryDto>> getBidsBySpecialistId(@PathVariable Long specialistId) {
+        return ResponseEntity.ok(bidService.getBidsBySpecialistId(specialistId));
+    }
 }
