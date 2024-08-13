@@ -50,4 +50,9 @@ public class OrderController {
         return ResponseEntity.ok(orderService.updateOrder(orderId, requestDto));
     }
 
+    @GetMapping("/available")
+    public ResponseEntity<List<OrderSummaryDto>> getAvailableOrdersForSpecialist(@RequestParam Long specialistId) {
+        return ResponseEntity.ok(orderService.getAvailableOrdersForSpecialist(specialistId));
+    }
+
 }
