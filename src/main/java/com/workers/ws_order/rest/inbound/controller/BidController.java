@@ -47,4 +47,10 @@ public class BidController {
     public ResponseEntity<List<BidSummaryDto>> getBidsBySpecialistId(@PathVariable Long specialistId) {
         return ResponseEntity.ok(bidService.getBidsBySpecialistId(specialistId));
     }
+
+    @PostMapping("/{bidId}/cancel")
+    public ResponseEntity<?> cancelBid(@PathVariable Long bidId) {
+        bidService.cancelBid(bidId);
+        return ResponseEntity.ok().build();
+    }
 }
