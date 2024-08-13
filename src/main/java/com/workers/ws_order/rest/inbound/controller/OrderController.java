@@ -55,4 +55,10 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getAvailableOrdersForSpecialist(specialistId));
     }
 
+    @PostMapping("/{orderId}/complete")
+    public ResponseEntity<?> completeOrder(@PathVariable Long orderId, @RequestParam Long specialistId) {
+        orderService.completeOrder(orderId, specialistId);
+        return ResponseEntity.ok().build();
+    }
+
 }

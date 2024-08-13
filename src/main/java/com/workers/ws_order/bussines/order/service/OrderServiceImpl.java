@@ -2,6 +2,7 @@ package com.workers.ws_order.bussines.order.service;
 
 import com.workers.ws_order.bussines.order.interfaces.OrderService;
 import com.workers.ws_order.bussines.order.mapper.OrderMapper;
+import com.workers.ws_order.persistance.entity.BidEntity;
 import com.workers.ws_order.persistance.entity.OrderEntity;
 import com.workers.ws_order.persistance.entity.OrderPhotoEntity;
 import com.workers.ws_order.persistance.enums.BidStatus;
@@ -22,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Slf4j
@@ -166,6 +168,22 @@ public class OrderServiceImpl implements OrderService {
                 .filter(order -> !bidRepository.existsByOrderIdAndStatus(order.getId(), BidStatus.ACCEPTED))
                 .map(orderMapper::toSummaryDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public void completeOrder(Long orderId, Long specialistId) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found with ID: " + orderId));
+
+        BidEntity acceptedBid = bidRepository.findFirstByOrderIdAndStatus(orderId, BidStatus.ACCEPTED);
+        if (acceptedBid == null || !acceptedBid.getSpecialistId().equals(specialistId)) {
+            throw new ResponseStatusException(BAD_REQUEST, "Only the specialist with the accepted bid can complete the order");
+        }
+
+        order.setStatus(OrderStatus.COMPLETED);
+        orderRepository.save(order);
+        log.info("Order with ID: {} has been marked as completed by specialist ID: {}", orderId, specialistId);
     }
 
 }

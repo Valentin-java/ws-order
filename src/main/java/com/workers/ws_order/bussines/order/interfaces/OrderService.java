@@ -20,4 +20,6 @@ public interface OrderService {
     OrderCreateResponseDto updateOrder(Long orderId, OrderUpdateRequestDto requestDto);
 
     List<OrderSummaryDto> getAvailableOrdersForSpecialist(Long specialistId);
+
+    void completeOrder(Long orderId, Long specialistId);
 }

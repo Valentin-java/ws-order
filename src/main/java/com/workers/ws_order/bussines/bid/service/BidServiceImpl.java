@@ -3,6 +3,7 @@ package com.workers.ws_order.bussines.bid.service;
 import com.workers.ws_order.bussines.bid.interfaces.BidService;
 import com.workers.ws_order.bussines.bid.mapper.BidMapper;
 import com.workers.ws_order.persistance.entity.BidEntity;
+import com.workers.ws_order.persistance.enums.BidStatus;
 import com.workers.ws_order.persistance.repository.BidRepository;
 import com.workers.ws_order.rest.inbound.dto.createbid.BidCreateRequestDto;
 import com.workers.ws_order.rest.inbound.dto.createbid.BidCreateResponseDto;
@@ -19,6 +20,7 @@ import static com.workers.ws_order.persistance.enums.BidStatus.ACCEPTED;
 import static com.workers.ws_order.persistance.enums.BidStatus.NEW;
 import static com.workers.ws_order.persistance.enums.BidStatus.PENDING;
 import static com.workers.ws_order.persistance.enums.BidStatus.REJECTED;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Slf4j
@@ -102,5 +104,19 @@ public class BidServiceImpl implements BidService {
                 .stream()
                 .map(bidMapper::toSummaryDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public void cancelBid(Long bidId) {
+        BidEntity bid = findBidById(bidId);
+
+        if (bid.getStatus() == BidStatus.ACCEPTED) {
+            throw new ResponseStatusException(BAD_REQUEST, "Cannot cancel a bid that has been accepted");
+        }
+
+        bid.setStatus(BidStatus.CANCELLED);
+        bidRepository.save(bid);
+        log.info("Bid with ID: {} has been cancelled", bidId);
     }
 }

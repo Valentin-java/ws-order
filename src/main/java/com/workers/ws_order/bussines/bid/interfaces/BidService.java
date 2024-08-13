@@ -17,4 +17,6 @@ public interface BidService {
     void rejectBid(Long bidId);
 
     List<BidSummaryDto> getBidsBySpecialistId(Long specialistId);
+
+    void cancelBid(Long bidId);
 }
