@@ -93,4 +93,14 @@ public class BidServiceImpl implements BidService {
             }
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BidSummaryDto> getBidsBySpecialistId(Long specialistId) {
+        log.info("Fetching bids for specialist ID: {}", specialistId);
+        return bidRepository.findBySpecialistId(specialistId)
+                .stream()
+                .map(bidMapper::toSummaryDto)
+                .toList();
+    }
 }

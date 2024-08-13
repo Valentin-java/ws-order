@@ -13,4 +13,5 @@ public interface BidRepository extends JpaRepository<BidEntity, Long> {
     BidEntity findFirstByOrderIdAndStatus(Long orderId, BidStatus status);
     List<BidEntity> findByOrderIdAndStatus(Long orderId, BidStatus status);
     boolean existsByOrderIdAndStatus(Long orderId, BidStatus status);
+    List<BidEntity> findBySpecialistId(Long specialistId);
 }
