@@ -43,7 +43,6 @@ public class MessageEntity {
     @Column(name = "is_read", nullable = false)
     private Boolean isRead = false;
 
-    @ManyToOne
-    @JoinColumn(name = "bid_id", nullable = false)
-    private BidEntity bid;
+    @Column(name = "bid_id", nullable = false)
+    private Long bidId;
 }

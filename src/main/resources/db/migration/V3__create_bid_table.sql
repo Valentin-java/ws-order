@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS "ws01_bid" (
+CREATE TABLE IF NOT EXISTS "ws-order-management"."ws01_bid" (
     id BIGSERIAL NOT NULL,
     order_id BIGINT NOT NULL,
     specialist_id BIGINT NOT NULL,
@@ -6,6 +6,5 @@ CREATE TABLE IF NOT EXISTS "ws01_bid" (
     status VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    FOREIGN KEY (order_id) REFERENCES "ws01_order" (id) ON DELETE CASCADE
+    PRIMARY KEY (id)
     );

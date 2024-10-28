@@ -1,18 +1,20 @@
 package com.workers.ws_order.bussines.order.service;
 
+import com.workers.ws_order.rest.inbound.dto.common.model.pagination.PageDomain;
 import com.workers.ws_order.bussines.order.interfaces.OrderService;
 import com.workers.ws_order.bussines.order.mapper.OrderMapper;
 import com.workers.ws_order.persistance.entity.BidEntity;
 import com.workers.ws_order.persistance.entity.OrderEntity;
-import com.workers.ws_order.persistance.entity.OrderPhotoEntity;
 import com.workers.ws_order.persistance.enums.BidStatus;
 import com.workers.ws_order.persistance.enums.OrderStatus;
+import com.workers.ws_order.persistance.projections.OrderSummaryProjection;
 import com.workers.ws_order.persistance.repository.BidRepository;
-import com.workers.ws_order.persistance.repository.OrderPhotoRepository;
 import com.workers.ws_order.persistance.repository.OrderRepository;
+import com.workers.ws_order.persistance.repository.custom.OrderPageableCustomRepository;
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateRequestDto;
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateResponseDto;
 import com.workers.ws_order.rest.inbound.dto.getorder.OrderSummaryDto;
+import com.workers.ws_order.rest.inbound.dto.getorder.OrderSummaryRequestDto;
 import com.workers.ws_order.rest.inbound.dto.updateorder.OrderUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -34,49 +37,21 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final BidRepository bidRepository;
     private final OrderRepository orderRepository;
-    private final OrderPhotoRepository orderPhotoRepository;
+    private final OrderPageableCustomRepository orderPageableCustomRepository;
 
     @Override
     @Transactional
     public OrderCreateResponseDto createOrder(OrderCreateRequestDto requestDto) {
         log.info("Creating a new order for customer ID: {}", requestDto.customerId());
 
-        // Шаг 1: Создание сущности заказа
-        OrderEntity orderEntity = createOrderEntity(requestDto);
-
-        // Шаг 2: Сохранение заказа в базе данных
-        orderEntity = orderRepository.save(orderEntity);
-
-        // Шаг 3: Сохранение фотографий заказа
-        List<OrderPhotoEntity> photos = saveOrderPhotos(requestDto.photoData(), orderEntity);
-
-        // Шаг 4: Формирование и возврат ответа
-        OrderCreateResponseDto responseDto = mapToResponseDto(orderEntity, photos);
-
-        log.info("Order created successfully with ID: {}", responseDto.orderId());
-        return responseDto;
+        var orderEntity = orderRepository.save(createOrderEntity(requestDto));
+        return orderMapper.toResponseDto(orderEntity);
     }
 
     private OrderEntity createOrderEntity(OrderCreateRequestDto requestDto) {
         OrderEntity orderEntity = orderMapper.toEntity(requestDto);
         orderEntity.setStatus(OrderStatus.NEW);
         return orderEntity;
-    }
-
-    private List<OrderPhotoEntity> saveOrderPhotos(List<byte[]> photoDataList, OrderEntity orderEntity) {
-        List<OrderPhotoEntity> photos = new ArrayList<>();
-        for (byte[] photoData : photoDataList) {
-            OrderPhotoEntity photoEntity = new OrderPhotoEntity();
-            photoEntity.setPhotoData(photoData);
-            photoEntity.setOrder(orderEntity);
-            photos.add(photoEntity);
-        }
-        return orderPhotoRepository.saveAll(photos);
-    }
-
-    private OrderCreateResponseDto mapToResponseDto(OrderEntity orderEntity, List<OrderPhotoEntity> photos) {
-        orderEntity.setPhotos(photos);
-        return orderMapper.toResponseDto(orderEntity);
     }
 
     @Override
@@ -115,10 +90,9 @@ public class OrderServiceImpl implements OrderService {
 
         OrderEntity orderEntity = findOrderById(orderId);
         updateOrderFields(orderEntity, requestDto);
-        updateOrderPhotos(orderEntity, requestDto.photoData());
 
         orderEntity = saveOrder(orderEntity);
-        return mapToResponseDto(orderEntity);
+        return orderMapper.toResponseDto(orderEntity);
     }
 
     private OrderEntity findOrderById(Long orderId) {
@@ -130,44 +104,26 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.updateOrderFromDto(requestDto, orderEntity);
     }
 
-    private void updateOrderPhotos(OrderEntity orderEntity, List<byte[]> photoData) {
-        if (photoData != null && !photoData.isEmpty()) {
-            orderPhotoRepository.deleteAll(orderEntity.getPhotos());
-            List<OrderPhotoEntity> photos = mapPhotoDataToEntities(photoData, orderEntity);
-            orderPhotoRepository.saveAll(photos);
-            orderEntity.setPhotos(photos);
-        }
-    }
-
-    private List<OrderPhotoEntity> mapPhotoDataToEntities(List<byte[]> photoData, OrderEntity orderEntity) {
-        return photoData.stream()
-                .map(data -> {
-                    OrderPhotoEntity photoEntity = new OrderPhotoEntity();
-                    photoEntity.setPhotoData(data);
-                    photoEntity.setOrder(orderEntity);
-                    return photoEntity;
-                })
-                .toList();
-    }
-
     private OrderEntity saveOrder(OrderEntity orderEntity) {
         return orderRepository.save(orderEntity);
     }
 
-    private OrderCreateResponseDto mapToResponseDto(OrderEntity orderEntity) {
-        return orderMapper.toResponseDto(orderEntity);
-    }
-
     @Override
     @Transactional(readOnly = true)
-    public List<OrderSummaryDto> getAvailableOrdersForSpecialist(Long specialistId) {
-        log.info("Fetching available orders for specialist ID: {}", specialistId);
+    public PageDomain<OrderSummaryProjection> getAvailableOrdersForSpecialist(OrderSummaryRequestDto requestDto)
+            throws ExecutionException, InterruptedException {
+        log.info("Fetching available orders for specialist ID: {}", requestDto);
 
-        return orderRepository.findAllByStatus(OrderStatus.NEW)
-                .stream()
-                .filter(order -> !bidRepository.existsByOrderIdAndStatus(order.getId(), BidStatus.ACCEPTED))
-                .map(orderMapper::toSummaryDto)
-                .toList();
+
+        var futureRecordCount = CompletableFuture.supplyAsync(
+                () -> orderPageableCustomRepository.getRecordsCount(requestDto.filter()));
+        var orderList = orderPageableCustomRepository.getOrderListByFilter(requestDto);
+
+        return new PageDomain<>(
+                requestDto.pageable().getOffset(),
+                requestDto.pageable().getItemsLimit(),
+                futureRecordCount.get(),
+                orderList);
     }
 
     @Override

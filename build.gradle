@@ -53,6 +53,9 @@ dependencies {
 	implementation 'org.flywaydb:flyway-database-postgresql'
 	implementation 'org.flywaydb:flyway-core'
 	runtimeOnly 'org.postgresql:postgresql'
+	implementation 'org.jooq:jooq:3.18.21'
+	implementation 'org.jooq:jooq-codegen:3.18.21'
+	implementation 'org.jooq:jooq-meta:3.18.21'
 
 	// Порядок важен
 	compileOnly 'org.projectlombok:lombok'
@@ -60,6 +63,11 @@ dependencies {
 	implementation "org.mapstruct:mapstruct:1.5.5.Final"
 	annotationProcessor "org.mapstruct:mapstruct-processor:1.5.5.Final"
 
+	// util
+	implementation 'org.apache.commons:commons-lang3:3.17.0'
+	implementation 'org.apache.commons:commons-collections4:4.4'
+
+	// test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -74,3 +82,12 @@ dependencyManagement {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+//configurations.all {
+//
+//	force 'org.checkerframework:checker-qual:3.42.0'
+//	force 'com.google.guava:guava:14.0.1'
+//	resolutionStrategy {
+//		failOnVersionConflict()
+//	}
+//}

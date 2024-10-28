@@ -1,10 +1,9 @@
-CREATE TABLE IF NOT EXISTS "ws01_message" (
+CREATE TABLE IF NOT EXISTS "ws-order-management"."ws01_message" (
     id BIGSERIAL NOT NULL,
     sender_id BIGINT NOT NULL,
+    bid_id BIGINT NOT NULL,
     content TEXT NOT NULL,
     sent_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
-    bid_id BIGINT NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (bid_id) REFERENCES "ws01_bid" (id) ON DELETE CASCADE
+    PRIMARY KEY (id)
     );
