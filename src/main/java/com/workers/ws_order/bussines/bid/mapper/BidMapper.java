@@ -15,8 +15,6 @@ public interface BidMapper {
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "messages", ignore = true)
-    @Mapping(target = "order", ignore = true)
     BidEntity toEntity(BidCreateRequestDto requestDto);
 
     @Mapping(target = "bidId", source = "id")

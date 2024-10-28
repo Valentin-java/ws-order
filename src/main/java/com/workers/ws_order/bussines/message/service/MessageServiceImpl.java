@@ -35,7 +35,7 @@ public class MessageServiceImpl implements MessageService {
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Bid not found with ID: " + bidId));
 
         MessageEntity messageEntity = messageMapper.toEntity(requestDto);
-        messageEntity.setBid(bid);
+        messageEntity.setBidId(bid.getId());
         messageEntity = messageRepository.save(messageEntity);
 
         return messageMapper.toResponseDto(messageEntity);
@@ -44,9 +44,8 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional(readOnly = true)
     public List<MessageSummaryDto> getMessagesByBidId(Long bidId) {
-        BidEntity bid = findBidById(bidId);
 
-        return messageRepository.findByBid(bid)
+        return messageRepository.findByBidId(bidId)
                 .stream()
                 .map(messageMapper::toSummaryDto)
                 .toList();

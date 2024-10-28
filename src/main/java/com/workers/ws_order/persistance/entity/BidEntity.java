@@ -1,15 +1,13 @@
 package com.workers.ws_order.persistance.entity;
 
 import com.workers.ws_order.persistance.enums.BidStatus;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,8 +19,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -46,6 +42,7 @@ public class BidEntity {
     @Column(name = "price", nullable = false)
     private BigDecimal price;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private BidStatus status;
 
@@ -56,11 +53,4 @@ public class BidEntity {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @OneToMany(mappedBy = "bid", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MessageEntity> messages = new ArrayList<>();
-
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false, insertable = false, updatable = false)
-    private OrderEntity order;
 }

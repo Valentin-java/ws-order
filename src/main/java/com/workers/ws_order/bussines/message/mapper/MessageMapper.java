@@ -14,11 +14,11 @@ public interface MessageMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "sentAt", ignore = true)
     @Mapping(target = "isRead", ignore = true)
-    @Mapping(target = "bid", ignore = true)
+    @Mapping(target = "bidId", ignore = true)
     MessageEntity toEntity(MessageCreateRequestDto requestDto);
 
     @Mapping(target = "messageId", source = "id")
-    @Mapping(target = "bidId", source = "bid.id")
+    @Mapping(target = "bidId", source = "bidId")
     @Mapping(target = "timestamp", source = "sentAt")
     MessageCreateResponseDto toResponseDto(MessageEntity messageEntity);
 
