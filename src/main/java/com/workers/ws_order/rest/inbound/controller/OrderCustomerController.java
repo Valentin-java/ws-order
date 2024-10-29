@@ -1,12 +1,9 @@
 package com.workers.ws_order.rest.inbound.controller;
 
-import com.workers.ws_order.rest.inbound.dto.common.model.pagination.PageDomain;
-import com.workers.ws_order.bussines.order.interfaces.OrderService;
-import com.workers.ws_order.persistance.projections.OrderSummaryProjection;
+import com.workers.ws_order.bussines.order.customer.interfaces.OrderCustomerService;
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateRequestDto;
 import com.workers.ws_order.rest.inbound.dto.createorder.OrderCreateResponseDto;
 import com.workers.ws_order.rest.inbound.dto.getorder.OrderSummaryDto;
-import com.workers.ws_order.rest.inbound.dto.getorder.OrderSummaryRequestDto;
 import com.workers.ws_order.rest.inbound.dto.updateorder.OrderUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,15 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/order")
-public class OrderController {
+@RequestMapping("/v1/order/customer")
+public class OrderCustomerController {
 
-    private final OrderService service;
+    private final OrderCustomerService service;
 
     @PostMapping("/create")
     public ResponseEntity<?> createOrder(@RequestBody OrderCreateRequestDto requestDto) {
@@ -52,16 +47,5 @@ public class OrderController {
     @PostMapping("/update/{orderId}")
     public ResponseEntity<?> updateOrder(@PathVariable Long orderId, @RequestBody OrderUpdateRequestDto requestDto) {
         return ResponseEntity.ok(service.updateOrder(orderId, requestDto));
-    }
-
-    @PostMapping("/available")
-    public ResponseEntity<PageDomain<OrderSummaryProjection>> getAvailableOrdersForSpecialist(@RequestBody OrderSummaryRequestDto requestDto) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(service.getAvailableOrdersForSpecialist(requestDto));
-    }
-
-    @PostMapping("/{orderId}/complete")
-    public ResponseEntity<?> completeOrder(@PathVariable Long orderId, @RequestParam Long specialistId) {
-        service.completeOrder(orderId, specialistId);
-        return ResponseEntity.ok().build();
     }
 }

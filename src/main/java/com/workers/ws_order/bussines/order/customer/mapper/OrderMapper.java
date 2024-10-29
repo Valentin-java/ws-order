@@ -1,4 +1,4 @@
-package com.workers.ws_order.bussines.order.mapper;
+package com.workers.ws_order.bussines.order.customer.mapper;
 
 import com.workers.ws_order.config.mapper.MapperConfiguration;
 import com.workers.ws_order.persistance.entity.OrderEntity;
