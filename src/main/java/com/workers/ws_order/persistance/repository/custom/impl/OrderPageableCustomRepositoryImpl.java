@@ -8,7 +8,7 @@ import com.workers.ws_order.persistance.enums.OrderStatus;
 import com.workers.ws_order.persistance.repository.custom.OrderPageableCustomRepository;
 import com.workers.ws_order.rest.inbound.dto.getorder.OrderSummaryRequestDto;
 import com.workers.ws_order.rest.inbound.dto.getorder.OrderSummaryRequestFilter;
-import com.workers.ws_order.rest.inbound.dto.getorder.enums.OrderSummarySortBy;
+import com.workers.ws_order.rest.inbound.dto.common.model.pagination.enums.OrderSummarySortBy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -61,7 +61,7 @@ public class OrderPageableCustomRepositoryImpl implements OrderPageableCustomRep
     public long getRecordsCount(OrderSummaryRequestFilter filter) {
         return dslContext
                 .selectCount()
-                .from(table("ws-order-management.ws01_order").as("o"))
+                .from(table("\"ws-order-management\".ws01_order").as("o"))
                 .where(buildFilterSection(filter))
                 .fetchOne(0, Long.class);
     }
@@ -112,7 +112,7 @@ public class OrderPageableCustomRepositoryImpl implements OrderPageableCustomRep
                         orderStatusField.as("status"),
                         orderCreatedAtField.as("created_at")
                 )
-                .from(table("ws-order-management.ws01_order").as("o"))
+                .from(table("\"ws-order-management\".ws01_order").as("o"))
                 .where(buildFilterSection(filter))
                 .asTable("orderList");
     }
@@ -153,7 +153,7 @@ public class OrderPageableCustomRepositoryImpl implements OrderPageableCustomRep
         // Исключаем заказы, у которых есть хотя бы один bid со статусом ACCEPTED
         Condition noAcceptedBidsCondition = DSL.notExists(
                 DSL.selectOne()
-                        .from(table("ws-order-management.ws01_bid").as("b"))
+                        .from(table("\"ws-order-management\".ws01_bid").as("b"))
                         .where(
                                 bidOrderSerialField.eq(orderSerialField)
                                         .and(bidOrderStatusField.eq(BidStatus.ACCEPTED.name()))
@@ -171,22 +171,22 @@ public class OrderPageableCustomRepositoryImpl implements OrderPageableCustomRep
      * @return
      */
     private Collection<OrderField<?>> buildOrderSection(Sort<OrderSummarySortBy> sort) {
-        OrderField<?> resultSortField = orderCreatedAtField.desc();
+        OrderField<?> resultSortField = field("created_at", LocalDateTime.class).desc();
         if (sort != null && sort.getSortBy() != null) {
             Field<?> field = getOrderFieldName(sort);
             if (field != null) {
                 resultSortField = sort.getSortOrder() == SortOrder.DESC ? field.desc() : field.asc();
             }
         }
-        return List.of(resultSortField, orderSerialField.desc());
+        return List.of(resultSortField, field("id", Long.class).desc());
     }
 
     private Field<?> getOrderFieldName(Sort<OrderSummarySortBy> sort) {
         switch (sort.getSortBy()) {
             case ORDER_DATE:
-                return orderCreatedAtField;
+                return field("created_at", LocalDateTime.class);
             case AMOUNT:
-                return orderAmountField;
+                return field("amount", BigDecimal.class);
             default:
                 return null;
         }

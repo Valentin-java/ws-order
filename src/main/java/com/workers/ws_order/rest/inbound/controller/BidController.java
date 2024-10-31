@@ -18,39 +18,39 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/v1/bid")
 public class BidController {
-
-    private final BidService bidService;
+// декомпозировать для заказчика/исполнителя
+    private final BidService service;
 
     @PostMapping("/create")
     public ResponseEntity<?> createBid(@RequestBody BidCreateRequestDto requestDto) {
-        return ResponseEntity.ok(bidService.createBid(requestDto));
+        return ResponseEntity.ok(service.createBid(requestDto));
     }
 
     @GetMapping("/order/{orderId}")
     public ResponseEntity<List<BidSummaryDto>> getBidsByOrderId(@PathVariable Long orderId) {
-        return ResponseEntity.ok(bidService.getBidsByOrderId(orderId));
+        return ResponseEntity.ok(service.getBidsByOrderId(orderId));
     }
 
     @PostMapping("/{bidId}/accept")
     public ResponseEntity<?> acceptBid(@PathVariable Long bidId) {
-        bidService.acceptBid(bidId);
+        service.acceptBid(bidId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{bidId}/reject")
     public ResponseEntity<?> rejectBid(@PathVariable Long bidId) {
-        bidService.rejectBid(bidId);
+        service.rejectBid(bidId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/specialist/{specialistId}")
     public ResponseEntity<List<BidSummaryDto>> getBidsBySpecialistId(@PathVariable Long specialistId) {
-        return ResponseEntity.ok(bidService.getBidsBySpecialistId(specialistId));
+        return ResponseEntity.ok(service.getBidsBySpecialistId(specialistId));
     }
 
     @PostMapping("/{bidId}/cancel")
     public ResponseEntity<?> cancelBid(@PathVariable Long bidId) {
-        bidService.cancelBid(bidId);
+        service.cancelBid(bidId);
         return ResponseEntity.ok().build();
     }
 }
