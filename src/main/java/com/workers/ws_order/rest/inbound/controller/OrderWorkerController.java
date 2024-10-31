@@ -28,6 +28,8 @@ public class OrderWorkerController {
         return ResponseEntity.ok(service.getOrderByFilter(requestDto));
     }
 
+    // ручка для заказа в статусе inProgress
+
     @PostMapping("/{orderId}/complete")
     public ResponseEntity<?> completeOrder(@PathVariable Long orderId, @RequestParam Long specialistId) {
         service.completeOrder(orderId, specialistId);
