@@ -1,6 +1,6 @@
 package com.workers.ws_order.rest.inbound.controller;
 
-import com.workers.ws_order.bussines.order.worker.interfaces.OrderWorkerService;
+import com.workers.ws_order.bussines.order.handyman.interfaces.OrderWorkerService;
 import com.workers.ws_order.rest.inbound.dto.common.model.pagination.PageDomain;
 import com.workers.ws_order.persistance.projections.OrderSummaryProjection;
 import com.workers.ws_order.rest.inbound.dto.getorder.OrderSummaryRequestDto;
@@ -18,8 +18,8 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/order/worker")
-public class OrderWorkerController {
+@RequestMapping("/v1/order/handyman")
+public class OrderHandymanController {
 
     private final OrderWorkerService service;
 
