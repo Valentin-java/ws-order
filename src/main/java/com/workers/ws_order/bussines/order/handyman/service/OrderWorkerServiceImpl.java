@@ -1,6 +1,6 @@
-package com.workers.ws_order.bussines.order.worker.service;
+package com.workers.ws_order.bussines.order.handyman.service;
 
-import com.workers.ws_order.bussines.order.worker.interfaces.OrderWorkerService;
+import com.workers.ws_order.bussines.order.handyman.interfaces.OrderWorkerService;
 import com.workers.ws_order.persistance.entity.BidEntity;
 import com.workers.ws_order.persistance.entity.OrderEntity;
 import com.workers.ws_order.persistance.enums.BidStatus;

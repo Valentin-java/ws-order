@@ -1,4 +1,4 @@
-package com.workers.ws_order.bussines.order.worker.interfaces;
+package com.workers.ws_order.bussines.order.handyman.interfaces;
 
 import com.workers.ws_order.persistance.projections.OrderSummaryProjection;
 import com.workers.ws_order.rest.inbound.dto.common.model.pagination.PageDomain;
