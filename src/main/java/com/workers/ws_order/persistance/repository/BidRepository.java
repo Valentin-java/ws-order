@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BidRepository extends JpaRepository<BidEntity, Long> {
@@ -14,4 +15,8 @@ public interface BidRepository extends JpaRepository<BidEntity, Long> {
     List<BidEntity> findByOrderIdAndStatus(Long orderId, BidStatus status);
     boolean existsByOrderIdAndStatus(Long orderId, BidStatus status);
     List<BidEntity> findBySpecialistId(Long specialistId);
+
+    Optional<BidEntity> findBidEntityByOrderIdAndId(Long orderId, Long bidId);
+
+    Boolean existsBidEntityBySpecialistIdAndOrderId(Long specialistId, Long orderId);
 }
