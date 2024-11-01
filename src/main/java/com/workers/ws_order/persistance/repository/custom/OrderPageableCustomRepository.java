@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface OrderPageableCustomRepository {
 
-    long getRecordsCount(OrderSummaryRequestFilter filter);
+    Long getRecordsCount(OrderSummaryRequestFilter filter);
 
     List<OrderSummaryProjection> getOrderListByFilter(OrderSummaryRequestDto request);
 }
