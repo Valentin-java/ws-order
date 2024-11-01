@@ -1,5 +1,6 @@
 package com.workers.ws_order.bussines.bid.interfaces;
 
+import com.workers.ws_order.rest.inbound.dto.acceptbid.BidChangeStatusRequest;
 import com.workers.ws_order.rest.inbound.dto.createbid.BidCreateRequestDto;
 import com.workers.ws_order.rest.inbound.dto.createbid.BidCreateResponseDto;
 import com.workers.ws_order.rest.inbound.dto.getbid.BidSummaryDto;
@@ -12,11 +13,11 @@ public interface BidService {
 
     List<BidSummaryDto> getBidsByOrderId(Long orderId);
 
-    void acceptBid(Long bidId);
+    void acceptBid(BidChangeStatusRequest request);
 
-    void rejectBid(Long bidId);
+    void rejectBid(BidChangeStatusRequest request);
 
     List<BidSummaryDto> getBidsBySpecialistId(Long specialistId);
 
-    void cancelBid(Long bidId);
+    void cancelBid(BidChangeStatusRequest request);
 }

@@ -1,7 +1,9 @@
 package com.workers.ws_order.rest.inbound.controller;
 
 import com.workers.ws_order.bussines.bid.interfaces.BidService;
+import com.workers.ws_order.rest.inbound.dto.acceptbid.BidChangeStatusRequest;
 import com.workers.ws_order.rest.inbound.dto.createbid.BidCreateRequestDto;
+import com.workers.ws_order.rest.inbound.dto.createbid.BidCreateResponseDto;
 import com.workers.ws_order.rest.inbound.dto.getbid.BidSummaryDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +20,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/v1/bid")
 public class BidController {
-// декомпозировать для заказчика/исполнителя
+// декомпозировать для заказчика/исполнителя // детальный бид для формы
     private final BidService service;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createBid(@RequestBody BidCreateRequestDto requestDto) {
+    public ResponseEntity<BidCreateResponseDto> createBid(@RequestBody BidCreateRequestDto requestDto) {
         return ResponseEntity.ok(service.createBid(requestDto));
     }
 
@@ -31,15 +33,15 @@ public class BidController {
         return ResponseEntity.ok(service.getBidsByOrderId(orderId));
     }
 
-    @PostMapping("/{bidId}/accept")
-    public ResponseEntity<?> acceptBid(@PathVariable Long bidId) {
-        service.acceptBid(bidId);
+    @PostMapping("/accept")
+    public ResponseEntity<Void> acceptBid(@RequestBody BidChangeStatusRequest request) {
+        service.acceptBid(request);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{bidId}/reject")
-    public ResponseEntity<?> rejectBid(@PathVariable Long bidId) {
-        service.rejectBid(bidId);
+    @PostMapping("/reject")
+    public ResponseEntity<Void> rejectBid(@RequestBody BidChangeStatusRequest request) {
+        service.rejectBid(request);
         return ResponseEntity.ok().build();
     }
 
@@ -48,9 +50,9 @@ public class BidController {
         return ResponseEntity.ok(service.getBidsBySpecialistId(specialistId));
     }
 
-    @PostMapping("/{bidId}/cancel")
-    public ResponseEntity<?> cancelBid(@PathVariable Long bidId) {
-        service.cancelBid(bidId);
+    @PostMapping("/cancel")
+    public ResponseEntity<Void> cancelBid(@RequestBody BidChangeStatusRequest request) {
+        service.cancelBid(request);
         return ResponseEntity.ok().build();
     }
 }
