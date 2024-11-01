@@ -38,6 +38,8 @@ public class OrderPageableCustomRepositoryImpl implements OrderPageableCustomRep
 
     private final DSLContext dslContext;
 
+    // Поля именно для формирования запроса в БД и в блоке фильтров метода buildOrderTable и buildFilterSection
+    // Используются алиасы в области видимости блока from, в других местах используем поля без алиаса.
     private final Field<Long> orderSerialField = field("o.id", Long.class);
     private final Field<Long> customerSerialField = field("o.customer_id", Long.class);
     private final Field<Integer> orderCategoryField = field("o.category", Integer.class);
@@ -58,7 +60,7 @@ public class OrderPageableCustomRepositoryImpl implements OrderPageableCustomRep
      */
     @Override
     @SuppressWarnings("unchecked")
-    public long getRecordsCount(OrderSummaryRequestFilter filter) {
+    public Long getRecordsCount(OrderSummaryRequestFilter filter) {
         return dslContext
                 .selectCount()
                 .from(table("\"ws-order-management\".ws01_order").as("o"))
@@ -79,8 +81,7 @@ public class OrderPageableCustomRepositoryImpl implements OrderPageableCustomRep
     }
 
     /**
-     *  Определяет, какие поля будут выбраны в запросе.
-     * @return
+     *  Определяет, какие поля будут выбраны из временой таблицы(orderList), которая сформируется в блоке from.
      */
     private SelectSelectStep<?> buildSelectSection() {
         return dslContext.select(
@@ -96,9 +97,7 @@ public class OrderPageableCustomRepositoryImpl implements OrderPageableCustomRep
     }
 
     /**
-     * Создает подзапрос с условиями фильтрации.
-     * @param filter
-     * @return
+     * Формирует запрос в БД для формирования временной таблице под названием orderList.
      */
     private Table<?> buildOrderTable(OrderSummaryRequestFilter filter) {
         return dslContext
@@ -117,6 +116,9 @@ public class OrderPageableCustomRepositoryImpl implements OrderPageableCustomRep
                 .asTable("orderList");
     }
 
+    /**
+     * Формирует блок фильтров запроса.
+     */
     private Condition buildFilterSection(OrderSummaryRequestFilter filter) {
 
         List<Condition> conditions = new ArrayList<>();
@@ -166,9 +168,7 @@ public class OrderPageableCustomRepositoryImpl implements OrderPageableCustomRep
     }
 
     /**
-     * Определяет порядок сортировки результатов.
-     * @param sort
-     * @return
+     * Формирует порядок сортировки результатов запроса.
      */
     private Collection<OrderField<?>> buildOrderSection(Sort<OrderSummarySortBy> sort) {
         OrderField<?> resultSortField = field("created_at", LocalDateTime.class).desc();
@@ -181,14 +181,14 @@ public class OrderPageableCustomRepositoryImpl implements OrderPageableCustomRep
         return List.of(resultSortField, field("id", Long.class).desc());
     }
 
+    /**
+     * Определяет поле для сортировки результатов запроса.
+     */
     private Field<?> getOrderFieldName(Sort<OrderSummarySortBy> sort) {
-        switch (sort.getSortBy()) {
-            case ORDER_DATE:
-                return field("created_at", LocalDateTime.class);
-            case AMOUNT:
-                return field("amount", BigDecimal.class);
-            default:
-                return null;
-        }
+        return switch (sort.getSortBy()) {
+            case ORDER_DATE -> field("created_at", LocalDateTime.class);
+            case AMOUNT -> field("amount", BigDecimal.class);
+            default -> null;
+        };
     }
 }

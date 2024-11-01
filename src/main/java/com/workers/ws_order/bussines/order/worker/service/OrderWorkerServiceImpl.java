@@ -33,7 +33,6 @@ public class OrderWorkerServiceImpl implements OrderWorkerService {
     private final OrderPageableCustomRepository orderPageableCustomRepository;
 
     @Override
-    @Transactional(readOnly = true)
     public PageDomain<OrderSummaryProjection> getOrderByFilter(OrderSummaryRequestDto requestDto)
             throws ExecutionException, InterruptedException {
         log.info("Fetching available orders for specialist ID: {}", requestDto);
